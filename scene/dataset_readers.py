@@ -211,6 +211,15 @@ def readCamerasFromTransforms(path, transformsfile, random_background, white_bac
             fovx = contents["camera_angle_x"]
         except:
             fovx = None
+        
+        camera_model = contents["camera_model"]
+        assert camera_model == "PINHOLE"
+        height = contents["h"]
+        width = contents["w"]
+        focal_length_x = contents["fl_x"]
+        focal_length_y = contents["fl_y"]
+        FovY = focal2fov(focal_length_y, height)
+        FovX = focal2fov(focal_length_x, width)
 
         frames = contents["frames"]
         # check if filename already contain postfix
@@ -252,39 +261,39 @@ def readCamerasFromTransforms(path, transformsfile, random_background, white_bac
             image_name = Path(cam_name).stem
             image = Image.open(image_path)
 
-            if undistorted:
-                mtx = np.array(
-                    [
-                        [frame["fl_x"], 0, frame["cx"]],
-                        [0, frame["fl_y"], frame["cy"]],
-                        [0, 0, 1.0],
-                    ],
-                    dtype=np.float32,
-                )
-                dist = np.array([frame["k1"], frame["k2"], frame["p1"], frame["p2"], frame["k3"]], dtype=np.float32)
-                im_data = np.array(image.convert("RGB"))
-                arr = cv2.undistort(im_data / 255.0, mtx, dist, None, mtx)
-                image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
-            else:
-                im_data = np.array(image.convert("RGBA"))
-                if random_background:
-                    bg = [np.random.random(),np.random.random(),np.random.random()] 
-                elif white_background:
-                    bg = [1.0, 1.0, 1.0]
-                else:
-                    bg = [0.0, 0.0, 0.0]
-                norm_data = im_data / 255.0
-                arr = norm_data[:,:,:3] * norm_data[:, :, 3:4] + bg * (1 - norm_data[:, :, 3:4])
-                image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
+            # if undistorted:
+            #     mtx = np.array(
+            #         [
+            #             [frame["fl_x"], 0, frame["cx"]],
+            #             [0, frame["fl_y"], frame["cy"]],
+            #             [0, 0, 1.0],
+            #         ],
+            #         dtype=np.float32,
+            #     )
+            #     dist = np.array([frame["k1"], frame["k2"], frame["p1"], frame["p2"], frame["k3"]], dtype=np.float32)
+            #     im_data = np.array(image.convert("RGB"))
+            #     arr = cv2.undistort(im_data / 255.0, mtx, dist, None, mtx)
+            #     image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
+            # else:
+            #     im_data = np.array(image.convert("RGBA"))
+            #     if random_background:
+            #         bg = [np.random.random(),np.random.random(),np.random.random()] 
+            #     elif white_background:
+            #         bg = [1.0, 1.0, 1.0]
+            #     else:
+            #         bg = [0.0, 0.0, 0.0]
+            #     norm_data = im_data / 255.0
+            #     arr = norm_data[:,:,:3] * norm_data[:, :, 3:4] + bg * (1 - norm_data[:, :, 3:4])
+            #     image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
 
-            if fovx is not None:
-                fovy = focal2fov(fov2focal(fovx, image.size[0]), image.size[1])
-                FovY = fovy 
-                FovX = fovx
-            else:
-                # given focal in pixel unit
-                FovY = focal2fov(frame["fl_y"], image.size[1])
-                FovX = focal2fov(frame["fl_x"], image.size[0])
+            # if fovx is not None:
+            #     fovy = focal2fov(fov2focal(fovx, image.size[0]), image.size[1])
+            #     FovY = fovy 
+            #     FovX = fovx
+            # else:
+            #     # given focal in pixel unit
+            #     FovY = focal2fov(frame["fl_y"], image.size[1])
+            #     FovX = focal2fov(frame["fl_x"], image.size[0])
 
             cam_infos.append(CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
                             image_path=image_path, image_name=image_name, width=image.size[0], height=image.size[1]))
@@ -343,7 +352,8 @@ def readNerfSyntheticInfo(path, random_background, white_background, eval, exten
     print("Reading Training Transforms")
     train_cam_infos = readCamerasFromTransforms(path, "transforms_train.json", random_background, white_background, extension)
     print("Reading Test Transforms")
-    test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", random_background, white_background, extension)
+    # test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", random_background, white_background, extension)
+    test_cam_infos = []
     
     if not eval:
         train_cam_infos.extend(test_cam_infos)
@@ -351,7 +361,7 @@ def readNerfSyntheticInfo(path, random_background, white_background, eval, exten
 
     nerf_normalization = getNerfppNorm(train_cam_infos)
     if ply_path is None:
-        ply_path = glob.glob(os.path.join(path, "*.ply"))[0]
+        ply_path = glob.glob(os.path.join(path, "points3d.ply"))[0]
     if not os.path.exists(ply_path):
         # Since this data set has no colmap data, we start with random points
         num_pts = 10_000
