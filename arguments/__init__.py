@@ -103,12 +103,12 @@ class OptimizationParams(ParamGroup):
         self.position_lr_init = 0.0
         self.position_lr_final = 0.0
         self.position_lr_delay_mult = 0.01
-        self.position_lr_max_steps = self.iterations
+        self.position_lr_max_steps = 40_000
         
         self.offset_lr_init = 0.01
         self.offset_lr_final = 0.0001
         self.offset_lr_delay_mult = 0.01
-        self.offset_lr_max_steps = self.iterations
+        self.offset_lr_max_steps = 40_000
 
         self.feature_lr = 0.0075
         self.opacity_lr = 0.02
@@ -118,33 +118,27 @@ class OptimizationParams(ParamGroup):
         self.mlp_opacity_lr_init = 0.002
         self.mlp_opacity_lr_final = 0.00002  
         self.mlp_opacity_lr_delay_mult = 0.01
-        self.mlp_opacity_lr_max_steps = self.iterations
+        self.mlp_opacity_lr_max_steps = 40_000
 
         self.mlp_cov_lr_init = 0.004
         self.mlp_cov_lr_final = 0.004
         self.mlp_cov_lr_delay_mult = 0.01
-        self.mlp_cov_lr_max_steps = self.iterations
+        self.mlp_cov_lr_max_steps = 40_000
         
         self.mlp_color_lr_init = 0.008
         self.mlp_color_lr_final = 0.00005
         self.mlp_color_lr_delay_mult = 0.01
-        self.mlp_color_lr_max_steps = self.iterations
-
-        self.mlp_color_lr_init = 0.008
-        self.mlp_color_lr_final = 0.00005
-        self.mlp_color_lr_delay_mult = 0.01
-        self.mlp_color_lr_max_steps = self.iterations
+        self.mlp_color_lr_max_steps = 40_000
         
         self.mlp_featurebank_lr_init = 0.01
         self.mlp_featurebank_lr_final = 0.00001
         self.mlp_featurebank_lr_delay_mult = 0.01
-        self.mlp_featurebank_lr_max_steps = self.iterations
+        self.mlp_featurebank_lr_max_steps = 40_000
 
         self.appearance_lr_init = 0.05
         self.appearance_lr_final = 0.0005
         self.appearance_lr_delay_mult = 0.01
-        self.appearance_lr_max_steps = self.iterations
-
+        self.appearance_lr_max_steps = 40_000
         self.percent_dense = 0.01
         self.lambda_dssim = 0.2
         
@@ -162,6 +156,17 @@ class OptimizationParams(ParamGroup):
         self.densify_grad_threshold = 0.0002
 
         super().__init__(parser, "Optimization Parameters")
+    
+    def update(self, args):
+        args.position_lr_max_steps = args.iterations
+        args.offset_lr_max_steps = args.iterations
+        args.mlp_opacity_lr_max_steps = args.iterations
+        args.mlp_cov_lr_max_steps = args.iterations
+        args.mlp_color_lr_max_steps = args.iterations
+        args.mlp_featurebank_lr_max_steps = args.iterations
+        args.appearance_lr_max_steps = args.iterations
+        return args
+        
 
 def get_combined_args(parser : ArgumentParser):
     cmdlne_string = sys.argv[1:]

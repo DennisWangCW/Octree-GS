@@ -243,7 +243,7 @@ namespace sibr {
 	void ParseData::getParsedBlenderData(const std::string& dataset_path)
 	{
 		_camInfos = InputCamera::loadTransform(dataset_path + "/transforms_test.json", 800, 800, "png", 0.01f, 1000.0f);
-		auto testInfos = InputCamera::loadTransform(dataset_path + "/transforms_train.json", 800, 800, "png", 0.01f, 1000.0f, _camInfos.size());
+		auto testInfos = InputCamera::loadTransform(dataset_path + "/transforms.json", 800, 800, "png", 0.01f, 1000.0f, _camInfos.size());
 		_camInfos.insert(_camInfos.end(), testInfos.begin(), testInfos.end());
 
 		_basePathName = dataset_path;
@@ -485,7 +485,7 @@ namespace sibr {
 		std::string meshroom = myArgs.dataset_path.get() + "/../../StructureFromMotion/";
 		std::string meshroom_sibr = myArgs.dataset_path.get() + "/StructureFromMotion/";
 		std::string chunked = myArgs.dataset_path.get() + "/chunk.dat";
-		std::string blender = myArgs.dataset_path.get() + "/transforms_train.json";
+		std::string blender = myArgs.dataset_path.get() + "/transforms.json";
 		std::string city_json = myArgs.dataset_path.get() + "/transforms.json";
 		std::string gaussian = myArgs.dataset_path.get() + "/cameras.json";
 

@@ -6,10 +6,11 @@ function rand(){
 }
 
 port=$(rand 10000 30000)
-
+unset all_proxy ALL_PROXY
 iterations=40_000
 warmup="False"
 progressive="False"
+alg_name=octree_gs
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -l|--logdir) logdir="$2"; shift ;;
@@ -30,37 +31,38 @@ while [[ "$#" -gt 0 ]]; do
         --init_level) init_level="$2"; shift ;;
         --extra_ratio) extra_ratio="$2"; shift ;;
         --extra_up) extra_up="$2"; shift ;;
+        --iterations) iterations="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
-time=$(date "+%Y-%m-%d_%H:%M:%S")
+time=$(date "+%Y%m%d%H%M%S")
 
 if [ "$progressive" = "True" ]; then
     if [ "$warmup" = "True" ]; then
-        python train.py --eval -s data/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} --warmup \
-        --iterations ${iterations} --port $port -m outputs/${data}/${logdir}/$time --appearance_dim ${appearance_dim} \
+        python train.py --eval --use_wandb -s ../data/inputs/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} --warmup \
+        --iterations ${iterations} --port $port -m ../data/outputs/${data}/${alg_name}/$time --appearance_dim ${appearance_dim} \
         --visible_threshold ${visible_threshold}  --base_layer ${base_layer} --dist2level ${dist2level} --update_ratio ${update_ratio} \
         --progressive --init_level ${init_level} --dist_ratio ${dist_ratio} --levels ${levels}  \
         --extra_ratio ${extra_ratio} --extra_up ${extra_up}
     else
-        python train.py --eval -s data/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} \
-        --iterations ${iterations} --port $port -m outputs/${data}/${logdir}/$time --appearance_dim ${appearance_dim} \
+        python train.py --eval --use_wandb -s ../data/inputs/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} \
+        --iterations ${iterations} --port $port -m ../data/outputs/${data}/${alg_name}/$time --appearance_dim ${appearance_dim} \
         --visible_threshold ${visible_threshold}  --base_layer ${base_layer} --dist2level ${dist2level} --update_ratio ${update_ratio} \
         --progressive --init_level ${init_level} --dist_ratio ${dist_ratio} --levels ${levels}  \
         --extra_ratio ${extra_ratio} --extra_up ${extra_up}  
     fi
 else
     if [ "$warmup" = "True" ]; then
-        python train.py --eval -s data/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} --warmup \
-        --iterations ${iterations} --port $port -m outputs/${data}/${logdir}/$time --appearance_dim ${appearance_dim} \
+        python train.py --eval --use_wandb -s ../data/inputs/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} --warmup \
+        --iterations ${iterations} --port $port -m ../data/outputs/${data}/${alg_name}/$time --appearance_dim ${appearance_dim} \
         --visible_threshold ${visible_threshold}  --base_layer ${base_layer} --dist2level ${dist2level} --update_ratio ${update_ratio} \
         --init_level ${init_level} --dist_ratio ${dist_ratio} --levels ${levels}  \
         --extra_ratio ${extra_ratio} --extra_up ${extra_up}  
     else
-        python train.py --eval -s data/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} \
-        --iterations ${iterations} --port $port -m outputs/${data}/${logdir}/$time --appearance_dim ${appearance_dim} \
+        python train.py --eval --use_wandb -s ../data/inputs/${data} -r ${resolution} --gpu ${gpu} --fork ${fork} --ratio ${ratio} \
+        --iterations ${iterations} --port $port -m ../data/outputs/${data}/${alg_name}/$time --appearance_dim ${appearance_dim} \
         --visible_threshold ${visible_threshold}  --base_layer ${base_layer} --dist2level ${dist2level} --update_ratio ${update_ratio} \
         --init_level ${init_level} --dist_ratio ${dist_ratio} --levels ${levels}  \
         --extra_ratio ${extra_ratio} --extra_up ${extra_up}  

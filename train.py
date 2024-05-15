@@ -521,6 +521,8 @@ if __name__ == "__main__":
         args.save_iterations.append(args.iterations)
     print(args.save_iterations)
 
+    args = op.update(args)
+
     if args.gpu != '-1':
         os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
         os.system("echo $CUDA_VISIBLE_DEVICES")
@@ -530,16 +532,20 @@ if __name__ == "__main__":
         saveRuntimeCode(os.path.join(args.model_path, 'backup'))
     except:
         logger.info(f'save code failed~')
-        
-    dataset = args.source_path.split('/')[-1]
-    exp_name = args.model_path.split('/')[-2]
     
+    if "merged" in args.source_path:
+        dataset = args.source_path.split('/')[-2]
+        scene_name = args.model_path.split('/')[-5] 
+    else:
+        dataset = args.source_path.split('/')[-1]
+        scene_name = args.model_path.split('/')[-4]
+    time_stamp = args.model_path.split('/')[-1]
     if args.use_wandb:
         wandb.login()
         run = wandb.init(
             # Set the project where this run will be logged
-            project=f"Octree-GS-{dataset}",
-            name=exp_name,
+            project=f"{scene_name}-{dataset}",
+            name=f"Octree-GS-{time_stamp}",
             # Track hyperparameters and run metadata
             settings=wandb.Settings(start_method="fork"),
             config=vars(args)

@@ -350,10 +350,9 @@ def readColmapSceneInfo(path, images, eval, ds, llffhold=8):
 
 def readNerfSyntheticInfo(path, random_background, white_background, eval, extension=".png", ply_path=None):
     print("Reading Training Transforms")
-    train_cam_infos = readCamerasFromTransforms(path, "transforms_train.json", random_background, white_background, extension)
+    train_cam_infos = readCamerasFromTransforms(path, "transforms.json", random_background, white_background, extension)
     print("Reading Test Transforms")
-    # test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", random_background, white_background, extension)
-    test_cam_infos = []
+    test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", random_background, white_background, extension)
     
     if not eval:
         train_cam_infos.extend(test_cam_infos)
@@ -361,7 +360,7 @@ def readNerfSyntheticInfo(path, random_background, white_background, eval, exten
 
     nerf_normalization = getNerfppNorm(train_cam_infos)
     if ply_path is None:
-        ply_path = glob.glob(os.path.join(path, "points3d.ply"))[0]
+        ply_path = glob.glob(os.path.join(path, "sparse_pc.ply"))[0]
     if not os.path.exists(ply_path):
         # Since this data set has no colmap data, we start with random points
         num_pts = 10_000
